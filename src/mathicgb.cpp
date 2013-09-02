@@ -342,7 +342,7 @@ struct GroebnerConfiguration::Pimpl {
     mComponentsAscending(true),
     mSchreyering(true),
     mReducer(DefaultReducer),
-    mMaxSPairGroupSize(0),
+    mSPairGroupType(""),
     mMaxThreadCount(0),
     mLogging(),
     mCallbackData(0),
@@ -393,7 +393,7 @@ struct GroebnerConfiguration::Pimpl {
   bool mComponentsAscending;
   bool mSchreyering;
   Reducer mReducer;
-  unsigned int mMaxSPairGroupSize;
+  std::string mSPairGroupType;
   unsigned int mMaxThreadCount;
   std::string mLogging;
   void* mCallbackData;
@@ -551,12 +551,12 @@ auto GroebnerConfiguration::reducer() const -> Reducer {
   return mPimpl->mReducer;
 }
 
-void GroebnerConfiguration::setMaxSPairGroupSize(unsigned int size) {
-  mPimpl->mMaxSPairGroupSize = size;
+void GroebnerConfiguration::setSPairGroupType(const std::string groupType) {
+  mPimpl->mSPairGroupType = groupType;
 }
 
-uint32 GroebnerConfiguration::maxSPairGroupSize() const {
-  return mPimpl->mMaxSPairGroupSize;
+std::string GroebnerConfiguration::SPairGroupType() const {
+  return mPimpl->mSPairGroupType;
 }
 
 void GroebnerConfiguration::setMaxThreadCount(unsigned int maxThreadCount) {
@@ -904,7 +904,7 @@ namespace mgbi {
     alg.setReducerMemoryQuantum(100 * 1024);
     alg.setUseAutoTopReduction(true);
     alg.setUseAutoTailReduction(false);
-    alg.setSPairGroupSize(conf.maxSPairGroupSize());
+    alg.setSPairGroupType(conf.SPairGroupType());
     if (!callback.isNull())
       alg.setCallback(&callback);
 

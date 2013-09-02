@@ -35,7 +35,7 @@ private:
   mathic::BoolParameter mAutoTailReduce;
   mathic::BoolParameter mAutoTopReduce;
   //mic::IntegerParameter mTermOrder;
-  mathic::IntegerParameter mSPairGroupSize;
+  mathic::StringParameter mSPairGroupType;
   mathic::IntegerParameter mMinMatrixToStore;
 };
 

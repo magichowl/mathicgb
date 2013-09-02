@@ -27,10 +27,9 @@ GBAction::GBAction():
     "classic Buchberger algorithm.",
     true),
 
-  mSPairGroupSize("sPairGroupSize",
-    "Specifies how many S-pair to reduce at one time. A value of 0 "
-    "indicates to use an appropriate default.",
-    0),
+  mSPairGroupType("sPairGroupType",
+    "Specifies S-pairs of minimal signature (MinSig) or minimal degree (MinDeg) to reduce at one time. Other values indicates to use an appropriate default.",
+    ""),
 
  mMinMatrixToStore("storeMatrices",
    "If using a matrix-based reducer, store the matrices that are generated in "
@@ -90,7 +89,7 @@ void GBAction::performAction() {
     mGBParams.mSPairQueue.value());
   alg.setBreakAfter(mGBParams.mBreakAfter.value());
   alg.setPrintInterval(mGBParams.mPrintInterval.value());
-  alg.setSPairGroupSize(mSPairGroupSize.value());
+  alg.setSPairGroupType(mSPairGroupType.value());
   alg.setReducerMemoryQuantum(mGBParams.mMemoryQuantum.value());
   alg.setUseAutoTopReduction(mAutoTopReduce.value());
   alg.setUseAutoTailReduction(mAutoTailReduce.value());
@@ -137,7 +136,7 @@ void GBAction::pushBackParameters(
   mGBParams.pushBackParameters(parameters);
   parameters.push_back(&mAutoTailReduce);
   parameters.push_back(&mAutoTopReduce);
-  parameters.push_back(&mSPairGroupSize);
+  parameters.push_back(&mSPairGroupType);
   parameters.push_back(&mMinMatrixToStore);
 }
 

@@ -18,6 +18,8 @@ class Basis;
 /// Calculates a classic Grobner basis using Buchberger's algorithm.
 class ClassicGBAlg {
 public:
+  typedef Reducer::SPairGroupType SPairGT; 
+
   ClassicGBAlg(
     const Basis& basis,
     Reducer& reducer,
@@ -51,9 +53,9 @@ public:
     mPrintInterval = reductions;
   }
 
-  /// A value of zero means to let the algorithm decide a reasonable
+  /// A value of "" means to let the algorithm decide a reasonable
   /// value based on the other settings.
-  void setSPairGroupSize(unsigned int groupSize);
+  void setSPairGroupType(const std::string groupType);
 
   void setReducerMemoryQuantum(size_t memoryQuantum) {
     mReducer.setMemoryQuantum(memoryQuantum);
@@ -81,7 +83,7 @@ private:
   Callback* mCallback;
   unsigned int mBreakAfter;
   unsigned int mPrintInterval;
-  unsigned int mSPairGroupSize;
+  SPairGT mGroupType;
   bool mUseAutoTopReduction;
   bool mUseAutoTailReduction;
 

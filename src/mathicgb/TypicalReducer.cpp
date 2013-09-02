@@ -9,8 +9,8 @@
 
 MATHICGB_NAMESPACE_BEGIN
 
-unsigned int TypicalReducer::preferredSetSize() const {
-  return 1;
+char TypicalReducer::preferredSetType() const {
+  return static_cast<char>(SPairGroupType::MinDeg);
 }
 
 void TypicalReducer::reset()

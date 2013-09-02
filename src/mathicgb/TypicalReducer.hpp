@@ -23,7 +23,7 @@ class PolyBasis;
 */
 class TypicalReducer : public Reducer {
 public:
-  virtual unsigned int preferredSetSize() const;
+  virtual char preferredSetType() const;
 
   virtual std::unique_ptr<Poly> regularReduce(
     const_monomial sig,

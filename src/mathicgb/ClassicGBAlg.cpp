@@ -25,7 +25,7 @@ ClassicGBAlg::ClassicGBAlg(
   mCallback(0),
   mBreakAfter(0),
   mPrintInterval(0),
-  mSPairGroupSize(reducer.preferredSetSize()),
+  mGroupType(static_cast<SPairGT>(reducer.preferredSetType())),
   mUseAutoTopReduction(true),
   mUseAutoTailReduction(false),
   mRing(*basis.getPolyRing()),
@@ -46,12 +46,12 @@ ClassicGBAlg::ClassicGBAlg(
     polys.push_back(make_unique<Poly>(*basis.getPoly(gen)));
   insertPolys(polys);
 }
-
-void ClassicGBAlg::setSPairGroupSize(unsigned int groupSize) {
-  if (groupSize == 0)
-    groupSize = mReducer.preferredSetSize();
-  else
-    mSPairGroupSize = groupSize;
+void ClassicGBAlg::setSPairGroupType(const std::string groupType) {
+  if (groupType == "MinSig")
+    mGroupType = SPairGT::MinSig;
+  else if (groupType == "MinDeg")
+    mGroupType = SPairGT::MinDeg;
+  // otherwise, mGroupType is mReducer.preferredSetType()
 }
 
 void ClassicGBAlg::insertPolys
@@ -242,21 +242,36 @@ void ClassicGBAlg::step() {
   if (tracingLevel > 30)
     std::cerr << "Determining next S-pair" << std::endl;
 
-  MATHICGB_ASSERT(mSPairGroupSize >= 1);
+  MATHICGB_ASSERT(mGroupType = SPairGT::MinSig || mGroupType == SPairGT::MinDeg);
   std::vector<std::pair<size_t, size_t> > spairGroup;
   exponent w = 0;
-  for (unsigned int i = 0; i < mSPairGroupSize; ++i) {
-    auto p = mSPairs.pop(w);
+  if (mGroupType == SPairGT::MinSig) {
+    auto p = mSPairs.pop();
     if (p.first == static_cast<size_t>(-1)) {
       MATHICGB_ASSERT(p.second == static_cast<size_t>(-1));
-      break; // no more S-pairs
-    }
-    MATHICGB_ASSERT(p.first != static_cast<size_t>(-1));
-    MATHICGB_ASSERT(p.second != static_cast<size_t>(-1));
-    MATHICGB_ASSERT(!mBasis.retired(p.first));
-    MATHICGB_ASSERT(!mBasis.retired(p.second));
+      // no more S-pairs
+    } else {
+      MATHICGB_ASSERT(p.first != static_cast<size_t>(-1));
+      MATHICGB_ASSERT(p.second != static_cast<size_t>(-1));
+      MATHICGB_ASSERT(!mBasis.retired(p.first));
+      MATHICGB_ASSERT(!mBasis.retired(p.second));
     
-    spairGroup.push_back(p);
+      spairGroup.push_back(p);
+    }
+  } else {
+    while (true) {
+      auto p = mSPairs.pop(w);
+      if (p.first == static_cast<size_t>(-1)) {
+	MATHICGB_ASSERT(p.second == static_cast<size_t>(-1));
+	break; // no more S-pairs
+      }
+      MATHICGB_ASSERT(p.first != static_cast<size_t>(-1));
+      MATHICGB_ASSERT(p.second != static_cast<size_t>(-1));
+      MATHICGB_ASSERT(!mBasis.retired(p.first));
+      MATHICGB_ASSERT(!mBasis.retired(p.second));
+    
+      spairGroup.push_back(p);
+    } 
   }
   if (spairGroup.empty())
     return; // no more s-pairs
@@ -336,7 +351,7 @@ void ClassicGBAlg::printStats(std::ostream& out) const {
   out << " divisor tab type:   " << mBasis.monoLookup().getName() << '\n';
   out << " S-pair queue type:  " << mSPairs.name() << '\n';
   out << " total compute time: " << mTimer.getMilliseconds()/1000.0 << " seconds " << '\n';
-  out << " S-pair group size:  " << mSPairGroupSize << '\n';
+  out << " S-pair group type:  " << (static_cast<char>(mGroupType) == 's' ? "S-pair of minimal signature" : "S-pairs of minimal degree") << '\n';
 
   mic::ColumnPrinter pr;
   pr.addColumn(true, " ");

@@ -21,12 +21,17 @@ class Reducer {
 public:
   virtual ~Reducer();
 
-  /// Returns the preferred number of reductions to do at a time. A classic
+  /// Returns the preferred group of S-pairs for reduction at a time. A classic
   /// serial reducer will have no particular benefit from doing more than
   /// one reduction at a time, so it should say that. A matrix-based or
   /// parallel reducer will have benefit from being presented with
   /// larger sets of reductions at a time.
-  virtual unsigned int preferredSetSize() const = 0;
+
+  enum class SPairGroupType : char {
+    MinSig = 's',
+    MinDeg = 'd'
+  };
+  virtual char preferredSetType() const = 0;
 
   // ***** Methods that do reduction
 

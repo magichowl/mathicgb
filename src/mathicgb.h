@@ -199,20 +199,20 @@ namespace mgb { // Part of the public interface of MathicGB
       MatrixReducer = 2 /// use linear algebra as in F4.
     };
 
-    /// Specify the way that polynoials are reduced.
+    /// Specify the way that polynomials are reduced.
     void setReducer(Reducer reducer);
     Reducer reducer() const;
 
-    /// Sets the maximum number of S-pairs to reduce at one time. This is
-    /// mainly useful as a (weak) control on memory usage for F4 reducers.
-    /// A value of 0 indicates to let the library decide this value for
-    /// itself, which is also the default and highly recommended value.
-    ///
-    /// For matrix-based reducers, use a high value. For serial classic
-    /// reduction, use a low value, preferably 1. Setting the value to
-    /// 0 already takes care of this.
-    void setMaxSPairGroupSize(unsigned int size);
-    unsigned int maxSPairGroupSize() const;
+    enum class SPairGroupType : char {
+      MinSig = 's',
+      MinDeg = 'd'
+    };
+    /// set the group of S-pairs to reduce at one time, 
+    /// MinSig means considering S-pair of mininal signature
+    /// MinDeg means considering S-pairs of minimal degree 
+    /// "" means let the library (reducer) decide this value
+    void setSPairGroupType(const std::string groupType);
+    std::string SPairGroupType() const;
 
     /// Sets the maximum number of threads to use. May use fewer threads.
     /// A value of 0 indicates to let the library decide this value for
@@ -249,8 +249,8 @@ namespace mgb { // Part of the public interface of MathicGB
   private:
     friend class mgbi::PimplOf;
 
-    void operator=(const GroebnerConfiguration&); // not available
-    bool operator==(const GroebnerConfiguration&); // not available
+    void operator=(const GroebnerConfiguration&) = delete; // not available
+    bool operator==(const GroebnerConfiguration&) = delete; // not available
 
     struct MonomialOrderData {
       BaseOrder baseOrder;
@@ -334,7 +334,7 @@ namespace mgb { // Part of the public interface of MathicGB
   /// GroebnerInputIdealStream input(configuration);
   /// IdealStreamChecker<GroebnerInputIdealStream> checked(input);
   /// checked.idealBegin(2); // describe ideal with 2 basis elements
-  ///   checked.appendPolynomial(2); // describe generator with 2 terms
+  ///   checked.appendPolynomialBegin(2); // describe generator with 2 terms
   ///     checked.appendTermBegin();
   ///       checked.appendExponent(0, 40); // x0^40
   ///     checked.appendTermDone(3); // 3 * x0^40

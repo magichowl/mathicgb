@@ -55,8 +55,8 @@ F4Reducer::F4Reducer(const PolyRing& ring, Type type):
   mMatrixSaveCount(0) {
 }
 
-unsigned int F4Reducer::preferredSetSize() const {
-  return 100000;
+char F4Reducer::preferredSetType() const {
+  return static_cast<char>(SPairGroupType::MinDeg);
 }
 
 void F4Reducer::writeMatricesTo(std::string file, size_t minEntries) {
