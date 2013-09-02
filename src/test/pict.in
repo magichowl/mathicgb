@@ -26,14 +26,15 @@ spairQueue: 0,1,2,3
 reducerType: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
 divLookup: 1, 2, 3, 4
 monTable: 1, 2, 3, 4
-buchberger: 0, 1
+buchberger: siggb, gb
 postponeKoszul: 0, 1
 useBaseDivisors: 0, 1
 autoTailReduce: 0,1
 autoTopReduce: 0,1
 preferSparseReducers: 0,1
 useSingularCriterionEarly: 0, 1
-sPairGroupSize: 0, 1, 2, 10, 100
+#sPairGroupSize: 0, 1, 2, 10, 100
+sPairGroupType: b, s
 threadCount: 1, 2, 8
 
 ##############################################################
@@ -46,13 +47,13 @@ threadCount: 1, 2, 8
 # This is the set of PICT constraints that rule out some combinations
 # of parameter values.
 #
-IF [buchberger] = 0 THEN
+IF [buchberger] = "siggb" THEN
   [autoTopReduce] = 0 AND
-  [autoTailReduce] = 0 AND
-  [reducerType] <> 25 AND
-  [reducerType] <> 26;
+  [autoTailReduce] = 0;
+# AND  [reducerType] <> 25 AND
+#  [reducerType] <> 26;
 
-IF [buchberger] = 1 THEN
+IF [buchberger] = "gb" THEN
   [postponeKoszul] = 0 AND
   [useBaseDivisors] = 0 AND
   [usesingularCriterionEarly] = 0;

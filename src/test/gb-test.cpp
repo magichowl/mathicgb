@@ -37,6 +37,15 @@ TEST(IO, ideal) {
   EXPECT_EQ("  -bc+ad\n  -b2+af\n  -bc2+a2e\n", toString(I.get()));
 }
 
+void testNoUsefulSPoly(std::unique_ptr<Reducer> reducer, const PolyBasis& pbasis){
+  size_t sz = pbasis.size();
+  for (size_t i = 0; i != sz; ++i)
+    for (size_t j = i+1; j != sz; ++j)            
+      ASSERT_TRUE(reducer->classicReduceSPoly(pbasis.poly(i),
+                                              pbasis.poly(j), pbasis)->isZero())
+                       <<"the computed polybasis is not a Grobner basis!";
+}
+
 void testGB(
   std::string idealStr,
   std::string sigBasisStr,
@@ -51,145 +60,123 @@ void testGB(
   // pict.in for details.
 #define MATHICGB_ESCAPE_MULTILINE_STRING(str) #str
 char const allPairsTests[] = MATHICGB_ESCAPE_MULTILINE_STRING(
-spairQueue	reducerType	divLookup	monTable	buchberger	postponeKoszul	useBaseDivisors	autoTailReduce	autoTopReduce	preferSparseReducers	useSingularCriterionEarly	sPairGroupSize	threadCount
-1	11	3	1	0	0	0	0	0	0	0	1	1
-2	8	1	2	0	1	1	0	0	1	1	1	2
-0	3	2	3	1	0	0	1	1	1	0	100	8
-3	23	4	4	0	1	1	0	0	0	1	100	1
-0	0	2	3	0	0	1	0	0	0	1	2	8
-3	24	1	2	1	0	0	1	1	0	0	100	2
-2	3	3	1	0	1	0	0	0	1	1	10	1
-2	16	4	4	1	0	0	1	1	0	0	10	8
-1	5	3	1	1	0	0	1	1	1	0	100	1
-1	14	2	4	1	0	0	1	0	1	0	100	2
-3	0	4	3	1	0	0	0	1	1	0	10	2
-3	18	3	2	1	0	0	0	1	0	0	100	8
-1	20	1	3	1	0	0	0	1	1	0	100	1
-3	16	2	2	1	0	0	1	0	1	0	2	1
-0	23	1	1	1	0	0	1	1	1	0	2	2
-1	6	4	1	1	0	0	0	1	1	0	100	8
-0	23	3	3	1	0	0	1	1	0	0	1	8
-1	1	1	2	1	0	0	0	1	0	0	10	8
-0	8	3	4	1	0	0	1	1	0	0	2	1
-3	2	2	1	1	0	0	0	1	0	0	10	8
-1	11	4	3	0	1	1	0	0	1	1	2	8
-0	13	3	1	0	1	1	0	0	1	0	10	2
-3	1	2	4	0	1	1	0	0	1	1	1	2
-0	22	4	2	1	0	0	1	1	0	0	10	8
-2	6	2	3	0	1	1	0	0	0	1	2	2
-2	18	1	4	0	1	1	0	0	1	1	10	1
-2	21	1	2	1	0	0	1	1	1	0	0	1
-1	26	4	4	1	0	0	1	0	0	0	1	2
-1	24	2	1	0	1	1	0	0	1	1	0	8
-0	20	4	4	0	1	1	0	0	0	1	0	2
-0	10	1	3	0	0	1	0	0	0	1	10	1
-3	6	1	4	0	1	0	0	0	0	1	1	1
-3	11	2	3	0	0	0	0	0	0	1	0	2
-1	2	1	2	0	1	1	0	0	1	1	2	1
-1	10	2	2	1	0	0	1	1	1	0	2	2
-1	9	3	3	0	1	0	0	0	1	1	0	2
-1	3	4	2	0	1	1	0	0	0	0	1	2
-2	26	2	1	1	0	0	0	1	1	0	100	1
-2	4	1	3	0	0	1	0	0	0	1	10	8
-2	23	2	2	0	1	1	0	0	0	1	10	1
-0	7	3	3	0	1	0	0	0	1	1	100	1
-1	8	4	3	0	0	1	0	0	0	1	100	8
-2	15	1	4	0	0	1	0	0	1	0	100	1
-1	13	2	2	0	0	0	0	0	0	1	2	1
-2	2	4	3	1	0	0	1	1	1	0	100	2
-0	2	3	4	1	0	0	1	1	1	0	0	1
-1	16	3	3	0	1	1	0	0	0	1	100	2
-0	25	1	2	1	0	0	1	0	0	0	2	8
-3	9	1	1	1	0	0	1	1	0	0	1	1
-3	21	2	3	0	1	1	0	0	0	1	10	8
-1	21	3	4	0	1	0	0	0	0	1	100	2
-3	17	2	1	0	0	1	0	0	0	1	0	1
-0	5	1	4	0	1	1	0	0	0	1	2	2
-0	17	4	3	1	0	0	1	1	1	0	1	2
-1	23	2	4	0	0	0	0	0	1	1	0	8
-3	8	2	1	1	0	0	1	0	1	0	0	1
-3	3	1	4	1	0	0	1	0	0	0	0	8
-1	7	1	2	1	0	0	1	1	0	0	1	2
-2	2	3	4	0	0	1	0	0	0	0	1	8
-0	16	1	1	1	0	0	1	0	1	0	1	8
-1	4	2	4	1	0	0	1	1	1	0	2	1
-2	7	4	4	1	0	0	0	1	0	0	2	8
-3	5	4	2	0	1	1	0	0	1	1	1	8
-2	1	3	3	0	0	0	0	0	1	1	2	1
-2	13	4	4	0	0	0	0	0	1	1	100	8
-2	5	2	3	0	0	0	0	0	0	1	10	1
-2	14	4	1	0	1	1	0	0	0	1	2	1
-1	25	4	4	1	0	0	0	1	1	0	1	2
-3	10	4	1	1	0	0	1	0	1	0	100	8
-2	0	1	2	0	1	0	0	0	0	1	0	1
-1	15	2	1	0	1	0	0	0	0	1	0	8
-0	21	4	1	1	0	0	0	1	1	0	2	1
-0	4	4	2	0	1	1	0	0	0	1	100	2
-0	12	2	1	1	0	0	1	1	0	0	10	8
-2	17	3	4	0	1	1	0	0	0	1	2	8
-0	9	4	2	0	0	1	0	0	0	0	100	8
-2	11	1	4	1	0	0	1	1	1	0	100	1
-3	5	4	4	0	1	0	0	0	0	1	0	8
-1	16	3	4	1	0	0	0	0	1	0	0	2
-0	24	3	3	0	0	1	0	0	0	1	10	1
-2	24	4	4	1	0	0	1	1	0	0	2	2
-1	22	2	3	0	1	1	0	0	1	1	2	2
-3	24	4	4	0	0	1	0	0	0	1	1	1
-3	13	1	3	1	0	0	1	1	0	0	0	8
-2	25	2	3	1	0	0	1	0	0	0	0	1
-3	7	2	1	0	1	1	0	0	0	1	10	1
-0	14	1	3	0	0	0	0	0	0	1	1	8
-2	19	2	2	1	0	0	1	0	1	0	1	1
-3	7	4	1	0	1	1	0	0	1	1	0	1
-3	15	3	2	0	1	1	0	0	0	1	1	2
-1	17	1	2	0	1	0	0	0	1	1	100	8
-3	25	3	1	1	0	0	0	1	1	0	100	8
-0	21	4	2	0	1	0	0	0	0	0	1	8
-2	20	3	1	0	1	0	0	0	0	1	2	8
-3	19	4	1	0	1	1	0	0	0	1	100	2
-3	26	1	3	1	0	0	1	1	1	0	2	8
-3	4	3	1	1	0	0	0	1	1	0	0	8
-0	3	4	1	1	0	0	1	1	0	0	2	1
-2	9	2	4	0	0	1	0	0	1	0	10	2
-0	11	4	2	0	0	1	0	0	0	0	10	8
-0	18	4	1	1	0	0	1	1	1	0	1	2
-2	10	3	4	1	0	0	1	1	1	0	1	2
-3	20	2	2	0	1	0	0	0	1	1	10	8
-0	19	3	3	1	0	0	0	1	1	0	2	8
-1	19	1	4	0	0	0	0	0	0	1	10	1
-3	14	3	2	1	0	0	0	1	0	0	0	1
-0	1	4	1	1	0	0	1	1	1	0	0	2
-2	12	4	2	0	1	1	0	0	1	1	2	2
-3	22	3	1	1	0	0	0	1	1	0	100	1
-0	20	4	2	0	0	0	0	0	1	1	1	8
-2	22	1	4	1	0	0	0	1	1	0	1	2
-1	25	2	1	1	0	0	0	1	1	0	10	8
-0	26	3	2	1	0	0	0	1	1	0	0	2
-0	9	3	1	1	0	0	1	1	0	0	2	2
-0	10	3	4	1	0	0	1	0	0	0	0	1
-3	13	4	3	1	0	0	1	0	0	0	1	8
-0	6	3	2	1	0	0	1	0	0	0	0	8
-1	0	3	1	0	1	0	0	0	1	1	100	2
-1	12	3	4	0	1	1	0	0	1	1	1	1
-1	0	2	4	0	1	0	0	0	0	1	1	1
-2	1	1	3	1	0	0	0	0	0	0	100	8
-2	19	1	3	1	0	0	1	0	1	0	0	8
-2	14	3	1	1	0	0	0	1	1	0	10	8
-3	12	1	3	0	1	1	0	0	1	1	0	1
-1	18	2	3	1	0	0	1	0	0	0	2	2
-1	12	4	3	1	0	0	1	0	0	0	100	2
-0	15	4	3	1	0	0	1	1	1	0	10	2
-1	6	2	1	0	0	1	0	0	1	1	10	8
-0	17	2	1	0	1	1	0	0	1	0	10	1
-2	4	4	1	0	0	0	0	0	1	1	1	8
-3	18	4	3	0	1	1	0	0	1	1	0	2
-1	8	4	1	1	0	0	0	1	0	0	10	1
-3	26	4	2	1	0	0	1	1	1	0	10	8
-2	22	4	4	0	0	0	0	0	1	1	0	8
-0	0	4	4	1	0	0	1	0	1	0	2	8
-0	15	1	4	0	1	0	0	0	0	1	2	2
-3	10	4	3	0	1	1	0	0	0	0	1	2
-3	20	4	1	1	0	0	1	0	0	0	1	8
+spairQueue	reducerType	divLookup	monTable	buchberger	postponeKoszul	useBaseDivisors	autoTailReduce	autoTopReduce	preferSparseReducers	useSingularCriterionEarly	sPairGroupType	threadCount
+1	5	3	1	siggb	0	0	0	0	0	0	b	2
+0	11	4	4	siggb	1	1	0	0	1	1	s	1
+2	25	2	2	siggb	0	0	0	0	1	1	b	8
+3	22	1	3	gb	0	0	1	1	1	0	s	2
+0	3	4	1	gb	0	0	1	1	0	0	b	1
+1	8	1	3	siggb	1	1	0	0	0	1	s	8
+2	14	2	4	gb	0	0	1	1	0	0	b	8
+3	1	3	2	siggb	1	1	0	0	1	1	s	1
+3	5	2	1	siggb	1	1	0	0	1	1	b	8
+1	16	3	3	gb	0	0	0	1	0	0	b	1
+2	0	2	4	siggb	1	1	0	0	0	1	s	2
+2	7	1	1	gb	0	0	1	0	0	0	s	1
+1	8	4	1	gb	0	0	1	1	1	0	b	2
+1	22	4	2	siggb	0	1	0	0	0	1	b	8
+0	5	1	2	gb	0	0	1	1	1	0	s	1
+2	3	3	3	siggb	1	1	0	0	1	1	s	8
+0	10	3	1	gb	0	0	1	0	0	0	b	2
+2	23	2	3	gb	0	0	1	1	0	0	b	1
+1	1	1	4	gb	0	0	1	1	0	0	b	2
+1	26	2	2	gb	0	0	1	0	0	0	s	2
+0	7	4	2	siggb	1	1	0	0	1	1	b	8
+3	12	4	2	gb	0	0	1	0	0	0	s	8
+1	6	3	4	gb	0	0	1	0	1	0	b	8
+0	6	2	1	siggb	1	1	0	0	0	1	s	2
+2	20	4	2	gb	0	0	1	1	1	0	s	8
+3	15	2	4	gb	0	0	1	0	0	0	s	8
+0	2	4	3	gb	0	0	0	1	0	0	s	8
+3	17	2	1	siggb	1	1	0	0	1	0	s	8
+1	24	1	1	siggb	1	0	0	0	0	0	b	8
+1	4	2	1	siggb	0	0	0	0	1	1	s	8
+1	15	1	3	siggb	1	1	0	0	1	1	b	2
+2	9	1	3	gb	0	0	1	0	1	0	s	2
+3	24	2	3	siggb	0	1	0	0	1	1	s	2
+0	21	1	1	siggb	0	1	0	0	1	1	b	8
+2	24	3	4	siggb	1	1	0	0	0	1	b	1
+0	23	1	2	siggb	1	1	0	0	1	1	s	8
+2	12	3	3	siggb	1	1	0	0	1	1	b	2
+0	20	3	1	siggb	1	1	0	0	0	1	b	2
+0	15	3	2	siggb	0	1	0	0	0	1	b	1
+3	23	3	1	siggb	0	0	0	0	0	1	s	2
+2	8	2	2	gb	0	0	0	1	0	0	s	1
+2	13	3	3	siggb	1	0	0	0	1	1	b	2
+1	11	1	2	gb	0	0	1	1	0	0	b	8
+0	18	3	1	siggb	0	1	0	0	0	1	s	8
+2	5	4	3	siggb	1	0	0	0	0	1	b	2
+1	23	4	4	siggb	0	1	0	0	1	1	b	2
+2	19	2	2	gb	0	0	0	0	0	0	s	8
+0	14	3	3	siggb	1	1	0	0	1	1	s	2
+0	12	2	4	gb	0	0	0	1	1	0	s	1
+2	10	2	2	siggb	1	1	0	0	1	1	s	1
+3	13	2	2	gb	0	0	1	1	0	0	s	1
+0	26	4	4	siggb	1	1	0	0	1	1	b	1
+2	18	4	2	gb	0	0	1	1	1	0	b	1
+3	11	2	1	siggb	1	1	0	0	1	1	s	2
+1	0	1	3	gb	0	0	1	1	1	0	b	1
+0	24	4	2	siggb	1	0	0	0	0	1	b	2
+3	14	4	2	gb	0	0	0	0	1	0	s	1
+0	22	3	4	gb	0	0	1	0	0	0	b	1
+1	20	2	4	siggb	1	1	0	0	0	1	s	1
+3	6	4	3	siggb	0	1	0	0	0	1	b	1
+0	19	3	3	siggb	1	1	0	0	1	1	b	2
+3	26	1	3	gb	0	0	0	1	1	0	b	8
+2	26	3	1	siggb	0	1	0	0	1	0	b	2
+1	25	4	3	gb	0	0	1	1	0	0	s	2
+1	19	1	4	gb	0	0	1	1	0	0	s	1
+2	15	4	1	siggb	1	0	0	0	0	1	s	8
+3	4	1	4	gb	0	0	1	1	0	0	b	1
+3	5	1	4	siggb	0	1	0	0	1	1	s	2
+0	17	1	3	siggb	0	0	0	0	0	1	b	1
+2	16	1	2	siggb	1	1	0	0	1	1	s	8
+1	3	1	4	gb	0	0	1	1	0	0	b	2
+1	9	2	4	siggb	1	1	0	0	0	1	b	8
+1	7	3	3	siggb	0	0	0	0	0	1	b	2
+1	18	2	4	gb	0	0	0	1	0	0	b	2
+2	2	2	2	siggb	1	1	0	0	1	1	b	2
+3	21	4	2	gb	0	0	1	1	0	0	s	1
+3	10	1	3	siggb	0	0	0	0	0	1	s	8
+2	1	2	1	siggb	1	1	0	0	0	1	b	8
+0	4	4	3	gb	0	0	0	1	0	0	b	2
+3	3	2	2	siggb	1	1	0	0	0	1	s	1
+0	9	4	2	siggb	0	0	0	0	0	1	b	1
+3	16	2	1	siggb	0	0	0	0	1	1	b	2
+0	16	4	4	gb	0	0	1	0	1	0	b	1
+3	18	1	3	gb	0	0	1	1	0	0	s	2
+1	2	3	4	gb	0	0	1	0	0	0	b	1
+1	13	1	4	gb	0	0	1	1	0	0	s	8
+2	21	3	3	siggb	1	0	0	0	1	1	s	2
+2	6	1	2	gb	0	0	1	1	1	0	s	2
+3	19	4	1	gb	0	0	1	0	1	0	s	8
+2	17	3	2	gb	0	0	1	1	0	0	s	2
+2	11	3	3	siggb	0	1	0	0	1	1	s	8
+0	8	3	4	gb	0	0	0	1	1	0	s	8
+3	20	1	3	gb	0	0	0	1	1	0	s	1
+1	21	2	4	gb	0	0	1	1	0	0	b	8
+0	1	4	3	gb	0	0	1	0	1	0	s	2
+3	9	3	1	gb	0	0	1	1	0	0	b	8
+3	8	3	1	siggb	1	1	0	0	0	1	b	1
+1	17	4	4	siggb	1	1	0	0	0	1	b	2
+3	7	2	4	gb	0	0	1	1	0	0	s	2
+1	14	1	1	siggb	1	0	0	0	1	0	b	8
+0	13	4	1	siggb	0	1	0	0	0	1	s	2
+1	12	1	1	siggb	1	0	0	0	0	1	s	8
+0	0	4	1	siggb	0	0	0	0	0	1	b	8
+2	4	3	2	gb	0	0	0	1	0	0	b	2
+2	22	2	1	siggb	1	0	0	0	0	1	b	1
+0	25	3	4	gb	0	0	1	0	1	0	s	1
+3	25	1	1	gb	0	0	1	0	1	0	s	2
+3	2	1	1	gb	0	0	0	1	1	0	b	8
+0	24	1	4	gb	0	0	1	1	0	0	b	2
+2	25	1	2	siggb	1	1	0	0	1	1	s	2
+1	10	4	4	siggb	1	1	0	0	0	1	s	8
+2	10	2	4	gb	0	0	1	1	0	0	s	8
+2	18	2	1	siggb	1	1	0	0	0	1	b	8
+3	0	3	2	siggb	0	1	0	0	0	0	s	1
+0	15	4	2	gb	0	0	0	1	1	0	s	1
+2	4	2	1	siggb	1	1	0	0	1	1	b	8
 );
   std::istringstream tests(allPairsTests);
   // skip the initial line with the parameter names.
@@ -198,7 +185,7 @@ spairQueue	reducerType	divLookup	monTable	buchberger	postponeKoszul	useBaseDivis
       "spairQueue", "reducerType", "divLookup", "monTable",
       "buchberger", "postponeKoszul", "useBaseDivisors", "autoTailReduce",
       "autoTopReduce", "preferSparseReducers", "useSingularCriterionEarly",
-      "sPairGroupSize", "threadCount"};
+      "sPairGroupType", "threadCount"};
 
     std::string paramName;
     size_t const paramCount = sizeof(params) / sizeof(*params);
@@ -236,9 +223,9 @@ spairQueue	reducerType	divLookup	monTable	buchberger	postponeKoszul	useBaseDivis
     tests >> monTable;
     MATHICGB_ASSERT(1 <= monTable && monTable <= 4);
     
-    int buchberger;
+    std::string buchberger;
     tests >> buchberger;
-    MATHICGB_ASSERT(0 <= buchberger && buchberger <= 1);
+    MATHICGB_ASSERT("gb" == buchberger && "siggb" == buchberger);
 
     int postponeKoszul;
     tests >> postponeKoszul;
@@ -265,9 +252,9 @@ spairQueue	reducerType	divLookup	monTable	buchberger	postponeKoszul	useBaseDivis
     MATHICGB_ASSERT(0 <= useSingularCriterionEarly);
     MATHICGB_ASSERT(useSingularCriterionEarly <= 1);
 
-    int sPairGroupSize;
-    tests >> sPairGroupSize;
-    MATHICGB_ASSERT(0 <= sPairGroupSize);
+    char sPairGroupType;
+    tests >> sPairGroupType;
+    MATHICGB_ASSERT('d' == sPairGroupType || 's' == sPairGroupType);
 
     int threadCount;
     tests >> threadCount;
@@ -276,13 +263,13 @@ spairQueue	reducerType	divLookup	monTable	buchberger	postponeKoszul	useBaseDivis
     // Rule out combinations of parameter values that do not make sense.
     // These are asserts because pict should have already removed these
     // combinations.
-    MATHICGB_ASSERT(buchberger || !autoTopReduce);
-    MATHICGB_ASSERT(buchberger || !autoTailReduce);
-    MATHICGB_ASSERT(buchberger || reducerType != 25);
-    MATHICGB_ASSERT(buchberger || reducerType != 26);
-    MATHICGB_ASSERT(!buchberger || !postponeKoszul);
-    MATHICGB_ASSERT(!buchberger || !useBaseDivisors);
-    MATHICGB_ASSERT(!buchberger || !useSingularCriterionEarly);
+    MATHICGB_ASSERT(buchberger == "gb" || !autoTopReduce);
+    MATHICGB_ASSERT(buchberger == "gb" || !autoTailReduce);
+    // MATHICGB_ASSERT(buchberger == "gb" || reducerType != 25);
+    // MATHICGB_ASSERT(buchberger == "gb" || reducerType != 26);
+    MATHICGB_ASSERT(buchberger == "siggb"  || !postponeKoszul);
+    MATHICGB_ASSERT(buchberger == "siggb" || !useBaseDivisors);
+    MATHICGB_ASSERT(buchberger == "siggb" || !useSingularCriterionEarly);
 
     // check that we have a valid reducer type
     Reducer::ReducerType red = Reducer::ReducerType(reducerType);
@@ -301,8 +288,8 @@ spairQueue	reducerType	divLookup	monTable	buchberger	postponeKoszul	useBaseDivis
     MATHICGB_ASSERT(Reducer::makeReducerNullOnUnknown(red, ring).get() != 0);
 
     mgb::mtbb::task_scheduler_init scheduler(threadCount);
-    if (buchberger) {
-      const auto reducer = Reducer::makeReducer
+    if (buchberger == "gb") {
+      auto reducer = Reducer::makeReducer
         (Reducer::reducerType(reducerType), ring);
       ClassicGBAlg alg(
         std::move(basis),
@@ -313,14 +300,16 @@ spairQueue	reducerType	divLookup	monTable	buchberger	postponeKoszul	useBaseDivis
       );
       alg.setUseAutoTopReduction(autoTopReduce);
       alg.setUseAutoTailReduction(autoTailReduce);
-      alg.setSPairGroupSize(sPairGroupSize);
+      alg.setSPairGroupType(sPairGroupType == 's' ? "MinSig" : "MinDeg");
       alg.computeGrobnerBasis();
-      std::unique_ptr<Basis> initialIdeal =
-        alg.basis().initialIdeal();
-      EXPECT_EQ(initialIdealStr, toString(initialIdeal.get()))
-        << reducerType << ' ' << divLookup << ' '
-        << monTable << ' ' << postponeKoszul << ' ' << useBaseDivisors;
-    } else {
+      /// the following is more reasonable but consume more time
+      testNoUsefulSPoly(std::move(reducer), alg.basis());
+      // std::unique_ptr<Basis> initialIdeal =
+      //   alg.basis().initialIdeal();
+      // EXPECT_EQ(initialIdealStr, toString(initialIdeal.get()))
+      //   << reducerType << ' ' << divLookup << ' '
+      //   << monTable << ' ' << postponeKoszul << ' ' << useBaseDivisors;
+    } else if (buchberger == "siggb" ){
       SignatureGB alg(
         std::move(basis),
         std::move(processor),
@@ -334,18 +323,26 @@ spairQueue	reducerType	divLookup	monTable	buchberger	postponeKoszul	useBaseDivis
         spairQueue
       );
       alg.computeGrobnerBasis();
-      EXPECT_EQ(sigBasisStr, toString(alg.getGB(), 1))
-        << reducerType << ' ' << divLookup << ' '
-        << monTable << ' ' << ' ' << postponeKoszul << ' '
-        << useBaseDivisors;
-      EXPECT_EQ(syzygiesStr, toString(alg.getSyzTable()))
-        << reducerType << ' ' << divLookup << ' '
-        << monTable << ' ' << ' ' << postponeKoszul << ' '
-        << useBaseDivisors;
-      EXPECT_EQ(nonSingularReductions, alg.getSigReductionCount() - alg.getSingularReductionCount())
-        << reducerType << ' ' << divLookup << ' '
-        << monTable << ' ' << ' ' << postponeKoszul << ' '
-        << useBaseDivisors;
+      std::string sBasis(toString(alg.getGB(), 1));
+      std::string sSyzTable(toString(alg.getSyzTable()));
+      size_t nonSigRed = alg.getSigReductionCount() - alg.getSingularReductionCount();
+
+      const PolyBasis& pbasis = alg.getGB()->basis();
+      auto reducer = Reducer::makeReducer
+        (Reducer::reducerType(reducerType), alg.getGB()->ring());
+      testNoUsefulSPoly(std::move(reducer), pbasis);
+      // EXPECT_EQ(sigBasisStr, toString(alg.getGB(), 1))
+      //   << reducerType << ' ' << divLookup << ' '
+      //   << monTable << ' ' << ' ' << postponeKoszul << ' '
+      //   << useBaseDivisors;
+      // EXPECT_EQ(syzygiesStr, toString(alg.getSyzTable()))
+      //   << reducerType << ' ' << divLookup << ' '
+      //   << monTable << ' ' << ' ' << postponeKoszul << ' '
+      //   << useBaseDivisors;
+      // EXPECT_EQ(nonSingularReductions, alg.getSigReductionCount() - alg.getSingularReductionCount())
+      //   << reducerType << ' ' << divLookup << ' '
+      //   << monTable << ' ' << ' ' << postponeKoszul << ' '
+      //   << useBaseDivisors;
     }
   }
 }
