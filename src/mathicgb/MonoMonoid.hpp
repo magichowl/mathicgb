@@ -1177,7 +1177,11 @@ public:
       return *this;
     }
 
-    ConstMonoRef operator*() const {return *this;}
+    ConstMonoRef operator*() const {return ConstMonoRef(*this);}
+
+    /// @todo: Get rid of this as soon as all code has been migrated
+    /// to observe the ptr/ref distinction. Kill it with fire!
+    operator ConstMonoRef() const {return ConstMonoRef(*this);}
 
     bool isNull() const {return mMono == 0;}
     void toNull() {mMono = 0;}
@@ -1201,7 +1205,11 @@ public:
       return *this;
     }
 
-    MonoRef operator*() const {return *this;}
+    MonoRef operator*() const {return MonoRef(*this);}
+
+    /// @todo: Get rid of this as soon as all code has been migrated
+    /// to observe the ptr/ref distinction. Kill it with fire!
+    operator MonoRef() const {return MonoRef(*this);}
 
     bool isNull() const {return mMono == 0;}
     void toNull() {mMono = 0;}
@@ -1266,6 +1274,10 @@ public:
 
     MonoPtr ptr() const {return mMono;}
 
+    /// @todo: Get rid of this as soon as all code has been migrated
+    /// to observe the ptr/ref distinction. Kill it with fire!
+    operator MonoPtr() const {return ptr();}
+
     operator MonoRef() const {
       MATHICGB_ASSERT(!isNull());
       return *mMono;
@@ -1285,6 +1297,10 @@ public:
     MonoRef(const MonoRef& mono): mMono(mono.ptr()) {}
 
     MonoPtr ptr() const {return mMono;}
+
+    /// @todo: Get rid of this as soon as all code has been migrated
+    /// to observe the ptr/ref distinction. Kill it with fire!
+    operator MonoPtr() const {return ptr();}
 
     operator ConstMonoRef() const {return *static_cast<ConstMonoPtr>(mMono);}
 
@@ -1306,6 +1322,10 @@ public:
     }
 
     ConstMonoPtr ptr() const {return mMono;}
+
+    /// @todo: Get rid of this as soon as all code has been migrated
+    /// to observe the ptr/ref distinction. Kill it with fire!
+    operator ConstMonoPtr() const {return ptr();}
 
   private:
     void operator=(const MonoRef&); // not available
@@ -1541,6 +1561,8 @@ private:
   friend class MonoVector;
   friend class MonoPool;
 
+  friend class PolyHashTable;
+
   typedef typename Base::Gradings Gradings;
 
   bool debugAssertValid() const {
@@ -1613,6 +1635,11 @@ private:
   );
 
     return true;
+  }
+
+  static MonoPtr toMonoPtr(Exponent* raw) {return MonoPtr(raw);}
+  static ConstMonoPtr toMonoPtr(const Exponent* raw) {
+    return ConstMonoPtr(raw);
   }
 
   // *** Accessing fields of a monomial

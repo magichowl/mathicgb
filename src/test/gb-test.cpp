@@ -6,7 +6,6 @@
 #include "mathicgb/Basis.hpp"
 #include "mathicgb/ModuleMonoSet.hpp"
 #include "mathicgb/io-util.hpp"
-#include "mathicgb/PolyHeap.hpp"
 #include "mathicgb/SigPolyBasis.hpp"
 #include "mathicgb/SignatureGB.hpp"
 #include "mathicgb/ClassicGBAlg.hpp"
@@ -61,122 +60,93 @@ void testGB(
 #define MATHICGB_ESCAPE_MULTILINE_STRING(str) #str
 char const allPairsTests[] = MATHICGB_ESCAPE_MULTILINE_STRING(
 spairQueue	reducerType	divLookup	monTable	buchberger	postponeKoszul	useBaseDivisors	autoTailReduce	autoTopReduce	preferSparseReducers	useSingularCriterionEarly	sPairGroupType	threadCount
-1	5	3	1	siggb	0	0	0	0	0	0	b	2
-0	11	4	4	siggb	1	1	0	0	1	1	s	1
-2	25	2	2	siggb	0	0	0	0	1	1	b	8
-3	22	1	3	gb	0	0	1	1	1	0	s	2
-0	3	4	1	gb	0	0	1	1	0	0	b	1
-1	8	1	3	siggb	1	1	0	0	0	1	s	8
-2	14	2	4	gb	0	0	1	1	0	0	b	8
-3	1	3	2	siggb	1	1	0	0	1	1	s	1
-3	5	2	1	siggb	1	1	0	0	1	1	b	8
-1	16	3	3	gb	0	0	0	1	0	0	b	1
-2	0	2	4	siggb	1	1	0	0	0	1	s	2
-2	7	1	1	gb	0	0	1	0	0	0	s	1
-1	8	4	1	gb	0	0	1	1	1	0	b	2
-1	22	4	2	siggb	0	1	0	0	0	1	b	8
-0	5	1	2	gb	0	0	1	1	1	0	s	1
-2	3	3	3	siggb	1	1	0	0	1	1	s	8
-0	10	3	1	gb	0	0	1	0	0	0	b	2
-2	23	2	3	gb	0	0	1	1	0	0	b	1
-1	1	1	4	gb	0	0	1	1	0	0	b	2
-1	26	2	2	gb	0	0	1	0	0	0	s	2
-0	7	4	2	siggb	1	1	0	0	1	1	b	8
-3	12	4	2	gb	0	0	1	0	0	0	s	8
-1	6	3	4	gb	0	0	1	0	1	0	b	8
-0	6	2	1	siggb	1	1	0	0	0	1	s	2
-2	20	4	2	gb	0	0	1	1	1	0	s	8
-3	15	2	4	gb	0	0	1	0	0	0	s	8
-0	2	4	3	gb	0	0	0	1	0	0	s	8
-3	17	2	1	siggb	1	1	0	0	1	0	s	8
-1	24	1	1	siggb	1	0	0	0	0	0	b	8
-1	4	2	1	siggb	0	0	0	0	1	1	s	8
-1	15	1	3	siggb	1	1	0	0	1	1	b	2
-2	9	1	3	gb	0	0	1	0	1	0	s	2
-3	24	2	3	siggb	0	1	0	0	1	1	s	2
-0	21	1	1	siggb	0	1	0	0	1	1	b	8
-2	24	3	4	siggb	1	1	0	0	0	1	b	1
-0	23	1	2	siggb	1	1	0	0	1	1	s	8
-2	12	3	3	siggb	1	1	0	0	1	1	b	2
-0	20	3	1	siggb	1	1	0	0	0	1	b	2
-0	15	3	2	siggb	0	1	0	0	0	1	b	1
-3	23	3	1	siggb	0	0	0	0	0	1	s	2
-2	8	2	2	gb	0	0	0	1	0	0	s	1
-2	13	3	3	siggb	1	0	0	0	1	1	b	2
-1	11	1	2	gb	0	0	1	1	0	0	b	8
-0	18	3	1	siggb	0	1	0	0	0	1	s	8
-2	5	4	3	siggb	1	0	0	0	0	1	b	2
-1	23	4	4	siggb	0	1	0	0	1	1	b	2
-2	19	2	2	gb	0	0	0	0	0	0	s	8
-0	14	3	3	siggb	1	1	0	0	1	1	s	2
-0	12	2	4	gb	0	0	0	1	1	0	s	1
-2	10	2	2	siggb	1	1	0	0	1	1	s	1
-3	13	2	2	gb	0	0	1	1	0	0	s	1
-0	26	4	4	siggb	1	1	0	0	1	1	b	1
-2	18	4	2	gb	0	0	1	1	1	0	b	1
-3	11	2	1	siggb	1	1	0	0	1	1	s	2
-1	0	1	3	gb	0	0	1	1	1	0	b	1
-0	24	4	2	siggb	1	0	0	0	0	1	b	2
-3	14	4	2	gb	0	0	0	0	1	0	s	1
-0	22	3	4	gb	0	0	1	0	0	0	b	1
-1	20	2	4	siggb	1	1	0	0	0	1	s	1
-3	6	4	3	siggb	0	1	0	0	0	1	b	1
-0	19	3	3	siggb	1	1	0	0	1	1	b	2
-3	26	1	3	gb	0	0	0	1	1	0	b	8
-2	26	3	1	siggb	0	1	0	0	1	0	b	2
-1	25	4	3	gb	0	0	1	1	0	0	s	2
-1	19	1	4	gb	0	0	1	1	0	0	s	1
-2	15	4	1	siggb	1	0	0	0	0	1	s	8
-3	4	1	4	gb	0	0	1	1	0	0	b	1
-3	5	1	4	siggb	0	1	0	0	1	1	s	2
-0	17	1	3	siggb	0	0	0	0	0	1	b	1
-2	16	1	2	siggb	1	1	0	0	1	1	s	8
-1	3	1	4	gb	0	0	1	1	0	0	b	2
-1	9	2	4	siggb	1	1	0	0	0	1	b	8
-1	7	3	3	siggb	0	0	0	0	0	1	b	2
-1	18	2	4	gb	0	0	0	1	0	0	b	2
-2	2	2	2	siggb	1	1	0	0	1	1	b	2
-3	21	4	2	gb	0	0	1	1	0	0	s	1
-3	10	1	3	siggb	0	0	0	0	0	1	s	8
-2	1	2	1	siggb	1	1	0	0	0	1	b	8
-0	4	4	3	gb	0	0	0	1	0	0	b	2
-3	3	2	2	siggb	1	1	0	0	0	1	s	1
-0	9	4	2	siggb	0	0	0	0	0	1	b	1
-3	16	2	1	siggb	0	0	0	0	1	1	b	2
-0	16	4	4	gb	0	0	1	0	1	0	b	1
-3	18	1	3	gb	0	0	1	1	0	0	s	2
-1	2	3	4	gb	0	0	1	0	0	0	b	1
-1	13	1	4	gb	0	0	1	1	0	0	s	8
-2	21	3	3	siggb	1	0	0	0	1	1	s	2
-2	6	1	2	gb	0	0	1	1	1	0	s	2
-3	19	4	1	gb	0	0	1	0	1	0	s	8
-2	17	3	2	gb	0	0	1	1	0	0	s	2
-2	11	3	3	siggb	0	1	0	0	1	1	s	8
-0	8	3	4	gb	0	0	0	1	1	0	s	8
-3	20	1	3	gb	0	0	0	1	1	0	s	1
-1	21	2	4	gb	0	0	1	1	0	0	b	8
-0	1	4	3	gb	0	0	1	0	1	0	s	2
-3	9	3	1	gb	0	0	1	1	0	0	b	8
-3	8	3	1	siggb	1	1	0	0	0	1	b	1
-1	17	4	4	siggb	1	1	0	0	0	1	b	2
-3	7	2	4	gb	0	0	1	1	0	0	s	2
-1	14	1	1	siggb	1	0	0	0	1	0	b	8
-0	13	4	1	siggb	0	1	0	0	0	1	s	2
-1	12	1	1	siggb	1	0	0	0	0	1	s	8
-0	0	4	1	siggb	0	0	0	0	0	1	b	8
-2	4	3	2	gb	0	0	0	1	0	0	b	2
-2	22	2	1	siggb	1	0	0	0	0	1	b	1
-0	25	3	4	gb	0	0	1	0	1	0	s	1
-3	25	1	1	gb	0	0	1	0	1	0	s	2
-3	2	1	1	gb	0	0	0	1	1	0	b	8
-0	24	1	4	gb	0	0	1	1	0	0	b	2
-2	25	1	2	siggb	1	1	0	0	1	1	s	2
-1	10	4	4	siggb	1	1	0	0	0	1	s	8
-2	10	2	4	gb	0	0	1	1	0	0	s	8
-2	18	2	1	siggb	1	1	0	0	0	1	b	8
-3	0	3	2	siggb	0	1	0	0	0	0	s	1
-0	15	4	2	gb	0	0	0	1	1	0	s	1
-2	4	2	1	siggb	1	1	0	0	1	1	b	8
+1	10	3	1	siggb	0	0	0	0	0	0	b	2
+0	18	3	4	siggb	1	1	0	0	1	1	s	1
+2	19	1	2	siggb	0	0	0	0	1	1	b	8
+3	23	1	3	gb	0	0	1	1	0	0	s	2
+0	16	4	3	gb	0	0	1	1	1	0	b	1
+0	26	2	4	gb	0	0	1	1	0	0	s	8
+3	25	4	1	siggb	1	1	0	0	0	1	s	8
+1	12	2	3	siggb	1	1	0	0	1	1	s	1
+3	21	3	2	gb	0	0	0	1	0	0	b	1
+2	14	2	2	siggb	1	1	0	0	1	1	b	2
+2	21	1	4	siggb	1	1	0	0	1	1	s	2
+2	24	1	1	gb	0	0	1	1	1	0	s	1
+3	26	1	4	siggb	1	1	0	0	1	1	b	2
+2	17	3	3	gb	0	0	1	0	0	0	b	8
+1	10	1	3	siggb	1	1	0	0	1	1	s	8
+1	7	4	3	gb	0	0	1	1	1	0	b	2
+1	17	4	2	siggb	0	1	0	0	1	1	s	1
+0	16	2	1	siggb	1	1	0	0	0	1	s	2
+0	21	1	2	gb	0	0	1	1	0	0	b	8
+3	7	2	4	siggb	1	1	0	0	0	1	s	1
+2	23	4	4	siggb	1	1	0	0	1	1	b	8
+2	16	1	2	gb	0	0	1	0	0	0	s	8
+3	22	2	2	gb	0	0	0	1	1	0	b	8
+3	9	3	3	siggb	1	1	0	0	1	0	s	8
+1	20	2	3	gb	0	0	1	0	1	0	s	8
+3	8	1	2	siggb	1	0	0	0	0	1	s	1
+1	23	2	2	gb	0	0	1	0	0	0	b	1
+1	9	4	4	siggb	0	0	0	0	0	1	b	1
+3	24	3	4	siggb	1	1	0	0	0	1	b	2
+0	23	3	1	siggb	0	1	0	0	0	1	s	8
+3	15	2	3	siggb	0	0	0	0	0	1	s	1
+2	20	1	4	siggb	1	1	0	0	0	1	b	1
+0	22	3	1	siggb	1	1	0	0	0	1	s	2
+2	11	2	3	siggb	1	1	0	0	1	1	s	1
+0	15	3	4	gb	0	0	1	1	1	0	b	8
+1	11	4	1	gb	0	0	1	1	0	0	b	8
+3	10	2	4	gb	0	0	1	1	1	0	b	1
+3	19	3	1	gb	0	0	1	1	0	0	s	1
+2	7	1	1	siggb	1	0	0	0	0	1	s	8
+1	15	4	1	siggb	1	1	0	0	0	1	s	2
+3	13	3	1	gb	0	0	1	0	1	0	b	1
+0	13	4	3	siggb	1	1	0	0	0	1	s	2
+3	16	3	4	siggb	0	1	0	0	0	1	b	1
+2	25	2	3	gb	0	0	1	1	1	0	b	2
+0	12	3	1	gb	0	0	1	1	0	0	b	2
+1	19	2	4	gb	0	0	1	0	0	0	b	2
+0	24	4	3	siggb	0	0	0	0	0	1	s	8
+1	25	1	2	siggb	0	1	0	0	0	1	s	1
+2	26	4	2	siggb	1	0	0	0	1	1	s	1
+2	8	4	4	gb	0	0	1	1	1	0	b	8
+2	18	2	1	gb	0	0	1	1	0	0	b	2
+1	22	4	3	gb	0	0	1	1	1	0	s	1
+2	10	4	2	siggb	1	0	0	0	0	1	b	1
+2	12	4	4	gb	0	0	1	1	1	0	s	8
+2	15	1	2	siggb	1	1	0	0	0	1	s	1
+1	24	2	2	gb	0	0	0	1	0	0	b	1
+3	14	1	4	gb	0	0	1	1	0	0	s	8
+1	16	2	2	siggb	1	0	0	0	1	1	s	1
+1	18	4	2	siggb	1	1	0	0	1	1	b	8
+2	9	1	2	siggb	1	0	0	0	0	1	s	2
+1	14	3	1	gb	0	0	0	0	1	0	s	1
+3	11	3	4	gb	0	0	1	0	1	0	b	2
+1	8	3	3	gb	0	0	1	0	1	0	s	2
+0	25	3	4	siggb	1	1	0	0	0	0	s	2
+0	9	2	1	siggb	0	0	0	0	0	1	b	1
+0	11	1	2	siggb	0	0	0	0	0	1	s	2
+2	13	2	4	gb	0	0	0	1	1	0	b	8
+1	21	2	1	gb	0	0	1	0	0	0	s	8
+3	20	4	2	gb	0	0	1	1	1	0	b	2
+0	8	2	1	gb	0	0	0	1	1	0	s	1
+0	7	3	2	gb	0	0	1	1	1	0	s	2
+0	19	4	3	gb	0	0	1	1	0	0	b	2
+1	26	3	1	gb	0	0	0	0	0	0	s	1
+3	18	1	3	siggb	0	1	0	0	0	1	b	2
+0	20	3	1	gb	0	0	1	0	1	0	b	1
+0	14	4	3	siggb	1	1	0	0	0	1	s	1
+3	12	1	2	gb	0	0	1	1	0	0	b	2
+3	17	2	1	gb	0	0	1	1	0	0	s	2
+3	26	2	3	siggb	1	1	0	0	0	1	b	1
+2	22	1	4	siggb	0	0	0	0	0	1	s	2
+0	17	1	4	siggb	1	0	0	0	1	1	b	2
+0	8	1	2	siggb	1	1	0	0	0	1	s	2
+0	10	2	4	siggb	0	0	0	0	1	1	b	8
+1	13	1	2	gb	0	0	1	1	1	0	s	1
+2	9	4	4	gb	0	0	1	1	1	0	s	8
+1	19	2	3	siggb	1	1	0	0	0	1	b	1
+0	21	4	3	siggb	0	0	0	0	1	1	b	8
 );
   std::istringstream tests(allPairsTests);
   // skip the initial line with the parameter names.
@@ -325,7 +295,7 @@ spairQueue	reducerType	divLookup	monTable	buchberger	postponeKoszul	useBaseDivis
       alg.computeGrobnerBasis();
       std::string sBasis(toString(alg.getGB(), 1));
       std::string sSyzTable(toString(alg.getSyzTable()));
-      size_t nonSigRed = alg.getSigReductionCount() - alg.getSingularReductionCount();
+      // size_t nonSigRed = alg.getSigReductionCount() - alg.getSingularReductionCount();
 
       const PolyBasis& pbasis = alg.getGB()->basis();
       auto reducer = Reducer::makeReducer

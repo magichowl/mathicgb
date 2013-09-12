@@ -24,21 +24,20 @@ size_t TypicalReducer::getMemoryUse() const {
 }
 
 std::unique_ptr<Poly> TypicalReducer::regularReduce(
-  const_monomial sig,
-  const_monomial multiple,
+  ConstMonoRef sig,
+  ConstMonoRef multiple,
   size_t basisElement,
   const SigPolyBasis& basis)
 {
   const PolyRing& ring = basis.ring();
-  ++mSigStats.reductions;
+  const auto& monoid = ring.monoid();
 
   monomial tproduct = ring.allocMonomial(mArena);
   monomial u = ring.allocMonomial(mArena);
-  ring.monomialMult(multiple, basis.getLeadMonomial(basisElement), tproduct);
+  monoid.multiply(multiple, basis.getLeadMonomial(basisElement), tproduct);
 
-  size_t reducer = basis.regularReducer(sig, tproduct);
+  size_t reducer = basis.regularReducer(Monoid::toOld(sig), tproduct);
   if (reducer == static_cast<size_t>(-1)) {
-    ++mSigStats.singularReductions;
     mArena.freeAllAllocs();
     return nullptr; // singular reduction: no regular top reduction possible
   }
@@ -47,7 +46,7 @@ std::unique_ptr<Poly> TypicalReducer::regularReduce(
 
   coefficient coef;
   ring.coefficientSet(coef, 1);
-  insertTail(const_term(coef, multiple), &basis.poly(basisElement));
+  insertTail(const_term(coef, Monoid::toOld(multiple)), &basis.poly(basisElement));
 
   MATHICGB_ASSERT(ring.coefficientIsOne(basis.getLeadCoefficient(reducer)));
   ring.coefficientFromInt(coef, -1);
@@ -59,7 +58,7 @@ std::unique_ptr<Poly> TypicalReducer::regularReduce(
   unsigned long long steps = 2; // number of steps in this reduction
   for (const_term v; leadTerm(v);) {
     MATHICGB_ASSERT(v.coeff != 0);
-    reducer = basis.regularReducer(sig, v.monom);
+    reducer = basis.regularReducer(Monoid::toOld(sig), v.monom);
     if (reducer == static_cast<size_t>(-1)) { // no reducer found
       result->appendTerm(v.coeff, v.monom);
       removeLeadTerm();
@@ -75,11 +74,6 @@ std::unique_ptr<Poly> TypicalReducer::regularReduce(
     }
   }
   result->makeMonic();
-
-  mSigStats.steps += steps;
-  mSigStats.maxSteps = std::max(mSigStats.maxSteps, steps);
-  if (result->isZero())
-    ++mSigStats.zeroReductions;
 
   reset();
   return result;
@@ -171,7 +165,6 @@ std::unique_ptr<Poly> TypicalReducer::classicReduce
     (std::unique_ptr<Poly> result, const PolyBasis& basis) {
   const PolyRing& ring = basis.ring();
   MATHICGB_ASSERT(&result->ring() == &ring);
-  ++mClassicStats.reductions;
 
   if (tracingLevel > 100)
     std::cerr << "Classic reduction begun." << std::endl;
@@ -214,11 +207,6 @@ std::unique_ptr<Poly> TypicalReducer::classicReduce
     }
   }
   result->makeMonic();
-
-  mClassicStats.steps += steps;
-  mClassicStats.maxSteps = std::max(mClassicStats.maxSteps, steps);
-  if (result->isZero())
-    ++mClassicStats.zeroReductions;
 
   if (tracingLevel > 100)
     std::cerr << "Classic reduction done." << std::endl;

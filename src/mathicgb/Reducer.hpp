@@ -4,21 +4,29 @@
 #define MATHICGB_REDUCER_GUARD
 
 #include "PolyRing.hpp"
-#include "Poly.hpp"
 #include <memtailor.h>
 #include <memory>
 
 MATHICGB_NAMESPACE_BEGIN
 
+class Poly;
 class SigPolyBasis;
 class PolyBasis;
 
-/** Abstract base class for classes that allow reduction of polynomials.
-
-todo: consider changing name of findLeadTerm to leadTerm.
-*/
+/// Abstract base class for classes that allow reduction of polynomials.
+///
+/// @todo: consider changing name of findLeadTerm to leadTerm.
 class Reducer {
 public:
+  typedef PolyRing::Monoid Monoid;
+  typedef Monoid::Mono Mono;
+  typedef Monoid::MonoRef MonoRef;
+  typedef Monoid::ConstMonoRef ConstMonoRef;
+  typedef Monoid::MonoPtr MonoPtr;
+  typedef Monoid::ConstMonoPtr ConstMonoPtr;
+
+  typedef coefficient Coefficient;
+
   virtual ~Reducer();
 
   /// Returns the preferred group of S-pairs for reduction at a time. A classic
@@ -33,65 +41,64 @@ public:
   };
   virtual char preferredSetType() const = 0;
 
+  virtual std::string description() const = 0;
+  virtual size_t getMemoryUse() const = 0;
+
   // ***** Methods that do reduction
 
-  /** Clasically reduces poly by the basis elements of basis. The reduction
-    is classic in that no signatures are taken into account. */
+  /// Clasically reduces poly by the basis elements of basis. The reduction
+  ///  is classic in that no signatures are taken into account.
   virtual std::unique_ptr<Poly> classicReduce
-  (const Poly& poly, const PolyBasis& basis) = 0;
+    (const Poly& poly, const PolyBasis& basis) = 0;
 
-  /** Clasically reduces poly by the basis elements of basis, except that the
-   lead term is not reduced. The reduction is classic in that no signatures
-   are taken into account. */
+  /// Clasically reduces poly by the basis elements of basis, except that the
+  /// lead term is not reduced. The reduction is classic in that no signatures
+  /// are taken into account.
   virtual std::unique_ptr<Poly> classicTailReduce
-  (const Poly& poly, const PolyBasis& basis) = 0;
+    (const Poly& poly, const PolyBasis& basis) = 0;
 
-  /** Clasically reduces the S-polynomial between a and b. */
+  /// Clasically reduces the S-polynomial between a and b.
   virtual std::unique_ptr<Poly> classicReduceSPoly
-  (const Poly& a, const Poly& b, const PolyBasis& basis) = 0;
+    (const Poly& a, const Poly& b, const PolyBasis& basis) = 0;
 
-  /** Clasically reduces the S-polynomial of these pairs. May or may
-      not also interreduce these to some extent. Polynomials that are
-      reduced to zero are not put into reducedOut. */
-  virtual void classicReduceSPolySet
-  (std::vector<std::pair<size_t, size_t> >& spairs,
-   const PolyBasis& basis,
-   std::vector<std::unique_ptr<Poly> >& reducedOut) = 0;
+  /// Clasically reduces the S-polynomial of these pairs. May or may
+  /// not also interreduce these to some extent. Polynomials that are
+  /// reduced to zero are not put into reducedOut.
+  virtual void classicReduceSPolySet(
+    std::vector<std::pair<size_t, size_t> >& spairs,
+    const PolyBasis& basis,
+    std::vector<std::unique_ptr<Poly> >& reducedOut
+  ) = 0;
 
-  /** Clasically reduces the passed-in polynomials of these pairs. May
-      or may not also interreduce these to some extent. Polynomials
-      that are reduced to zero are not put into reducedOut. */
-  virtual void classicReducePolySet
-  (const std::vector<std::unique_ptr<Poly> >& polys,
-   const PolyBasis& basis,
-   std::vector<std::unique_ptr<Poly> >& reducedOut) = 0;
+  /// Clasically reduces the passed-in polynomials of these pairs. May
+  /// or may not also interreduce these to some extent. Polynomials
+  /// that are reduced to zero are not put into reducedOut.
+  virtual void classicReducePolySet(
+    const std::vector<std::unique_ptr<Poly> >& polys,
+    const PolyBasis& basis,
+    std::vector<std::unique_ptr<Poly> >& reducedOut
+  ) = 0;
 
-  /** Regular reduce multiple*basisElement in signature sig by the
-    basis elements in basis. Returns null (0) if multiple*basisElement
-    is not regular top reducible -- this indicates a singular
-    reduction. */
+  /// Regular reduce multiple*basisElement in signature sig by the
+  /// basis elements in basis. Returns null (0) if multiple*basisElement
+  /// is not regular top reducible -- this indicates a singular
+  /// reduction.
   virtual std::unique_ptr<Poly> regularReduce(
-    const_monomial sig,
-    const_monomial multiple,
+    ConstMonoRef sig,
+    ConstMonoRef multiple,
     size_t basisElement,
-    const SigPolyBasis& basis) = 0;
+    const SigPolyBasis& basis
+  ) = 0;
 
-  /** Sets how many bytes of memory to increase the memory use by
-    at a time - if such a thing is appropriate for the reducer. */
+  /// Sets how many bytes of memory to increase the memory use by
+  /// at a time - if such a thing is appropriate for the reducer.
   virtual void setMemoryQuantum(size_t quantum) = 0;
+
 
   // ***** Kinds of reducers and creating a Reducer 
 
   enum ReducerType {
-    Reducer_PolyHeap,
-    Reducer_PolyGeoBucket,
-    Reducer_Poly,
-    Reducer_PolyHash,
-    Reducer_BjarkeGeo, // uses hash table on front to remove duplicates
-    Reducer_TournamentTree,
-    Reducer_HashTourTree,
-
-    Reducer_TourTree_NoDedup,
+    Reducer_TourTree_NoDedup = 7,
     Reducer_TourTree_Dedup,
     Reducer_TourTree_Hashed,
     Reducer_TourTree_NoDedup_Packed,
@@ -123,53 +130,39 @@ public:
     (ReducerType t, const PolyRing& ring);
 
   static ReducerType reducerType(int typ);
-  static void displayReducerTypes(std::ostream& o);
+  static void displayReducerTypes(std::ostream& out);
 
+  class Registration {
+  public:
+    Registration(
+      const char* name, 
+      ReducerType id,
+      std::unique_ptr<Reducer> (*create)(const PolyRing&)
+    );
 
-  // ***** Obtaining statistics about the reduction process
+  private:
+    friend class Reducer;
 
-  struct Stats {
-    Stats();
-
-    // Number of signature reductions performed including singular reductions.
-    unsigned long long reductions;
-
-    // Number of regular reductions where the polynomial was not top
-    // regular reducible.
-    unsigned long long singularReductions;
-
-    // Number of reductions to zero.
-    unsigned long long zeroReductions;
-
-    // Total number of steps across all reductions. Does not count detecting
-    // singular reduction as a reduction step.
-    unsigned long long steps;
-
-    // Number of reduction steps in the reduction that had the most steps.
-    unsigned long long maxSteps;
+    const char* mName; 
+    ReducerType mId;
+    std::unique_ptr<Reducer> (*mCreate)(const PolyRing&);
   };
-
-  Stats sigStats() const {return mSigStats;}
-  Stats classicStats() const {return mClassicStats;}
-
-
-  // ***** Miscellaneous
-
-  virtual std::string description() const = 0;
-  virtual size_t getMemoryUse() const = 0;
-  virtual void dump() const;
-
-protected:
-  Reducer();
-
-  size_t stats_maxsize;
-  size_t stats_maxsize_live;
-  unsigned long long stats_n_inserts;
-  unsigned long long stats_n_compares;
-
-  Stats mSigStats;
-  Stats mClassicStats;
 };
+
+/// Registers a reducer type with the given name and id. The value of
+/// create, when executed, should be something convertible to a
+/// std::unique_ptr<Reducer>. CREATE may pick up a const PolyRing&
+/// by the name ring.
+#define MATHICGB_REGISTER_REDUCER(NAME, ID, CREATE) \
+  namespace { \
+    Reducer::Registration MATHICGB_UNIQUE(reducerRegistration) ( \
+      NAME, \
+      Reducer:: ID, \
+      [](const PolyRing& ring) -> std::unique_ptr<Reducer> { \
+        return CREATE; \
+      } \
+    ); \
+  } 
 
 MATHICGB_NAMESPACE_END
 #endif
